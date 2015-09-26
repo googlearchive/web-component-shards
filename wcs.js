@@ -10,7 +10,6 @@
 // jshint node:true
 'use strict';
 var hydrolysis = require('hydrolysis');
-var Set = require('es6-set');
 var mkdirp = require('mkdirp');
 var url = require('url');
 var Vulcan = require('vulcanize');
