@@ -22,11 +22,9 @@ var WebComponentShards = function WebComponentShards(options){
   this.bowerdir = options.bowerdir;
   this.shared_import = options.shared_import;
   this.sharing_threshold = options.sharing_threshold;
-  console.log(this.root, options.workdir);
   this.dest_dir = url.resolve(this.root, options.dest_dir);
   this.workdir = options.workdir;
   this.built = false;
-  console.log(this);
 };
 
 
@@ -39,11 +37,9 @@ WebComponentShards.prototype = {
     };
     options.redirect = this.bowerdir;
     options.root = this.root;
-    console.log(endpoint, options);
     return hydrolysis.Analyzer.analyze(endpoint, options);
   },
   _getDeps: function _getDeps(endpoint) {
-    console.log("Calling _getDeps for " + endpoint +"!");
     return this._getAnalyzer(endpoint).then(function(analyzer){
       return analyzer._getDependencies(endpoint);
     }).catch(function(err){
@@ -91,7 +87,6 @@ WebComponentShards.prototype = {
   },
   _prepOutput: function _prepOutput() {
     var outDir = url.resolve(this.root, this.dest_dir);
-    console.log(outDir);
     mkdirp.sync(outDir);
   },
   build: function build() {
@@ -117,7 +112,6 @@ WebComponentShards.prototype = {
               if (err) {
                 reject(err);
               } else {
-                console.log("endpoint!!" , endpoint);
                 var outPath = url.resolve(this.dest_dir, endpoint);
                 var fd = fs.openSync(outPath, 'w');
                 fs.writeSync(fd, doc);
