@@ -14,7 +14,7 @@ var mkdirp = require('mkdirp');
 var url = require('url');
 var Vulcan = require('vulcanize');
 var fs = require('fs');
-var Promise = require('es6-promise');
+var Promise = require('es6-promise').Promise;
 
 var WebComponentShards = function WebComponentShards(options){
   this.root = options.root;
