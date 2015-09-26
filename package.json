@@ -1,0 +1,33 @@
+{
+  "name": "web-component-shards",
+  "version": "2.3.1",
+  "description": "Build an app with shared dependencies!",
+  "main": "wcs.js",
+  "bin": "bin/wcs.js",
+  "scripts": {
+    "test": "node_modules/.bin/jshint wcs.js bin"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PolymerLabs/web-component-shards.git"
+  },
+  "author": "The Polymer Project Authors",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/PolymerLabs/web-component-shards/issues"
+  },
+  "homepage": "https://github.com/PolymerLabs/web-component-shards",
+  "dependencies": {
+    "command-line-args": "^1.0.0",
+    "es6-promise": "^3.0.2",
+    "hydrolysis": "git://github.com/Polymer/hydrolysis.git#shardFixups",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.4.3",
+    "vulcanize": "git://github.com/Polymer/vulcanize.git#bowerDir"
+  },
+  "devDependencies": {
+    "chai": "^2.3.0",
+    "jshint": "^2.7.0",
+    "mocha": "^2.2.4"
+  }
+}
