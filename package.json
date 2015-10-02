@@ -1,6 +1,6 @@
 {
   "name": "web-component-shards",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Build an app with shared dependencies!",
   "main": "wcs.js",
   "bin": "bin/wcs.js",
