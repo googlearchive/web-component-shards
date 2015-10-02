@@ -62,7 +62,7 @@ var cli = cliArgs([
     alias: "s",
     defaultValue: 2,
     description: (
-      "Number of endpoints an import must be found in to be added to " + 
+      "Number of endpoints an import must be found in to be added to " +
       "'shared_import'. For example, 2 will include all imports found " +
       "in at least 2 endpoints, and 1 will include all dependencies of any" +
       "endpoint"
@@ -114,7 +114,7 @@ try {
     console.log(workdir);
     console.log("Working directory already exists! Please clean up.");
     process.exit(1);
-  } 
+  }
 } catch (err) {
   // This is good. The workdir shouldn't exist.
 }
@@ -131,7 +131,7 @@ if (!endpoints || !endpoints.length) {
 var shards = new WebComponentShards(options);
 shards.build().then(function(){
   console.log("Build success!");
-  //rimraf.sync(workPath, {});
+  rimraf.sync(workPath, {});
 }).catch(function(err){
   console.error(err.stack);
 });
