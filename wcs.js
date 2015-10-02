@@ -29,7 +29,7 @@ var WebComponentShards = function WebComponentShards(options){
 
 
 WebComponentShards.prototype = {
-  _getAnalyzer: function(endpoint) {
+  _getOptions: function() {
     var options = {};
     options.attachAST = true;
     options.filter = function(){
@@ -37,7 +37,13 @@ WebComponentShards.prototype = {
     };
     options.redirect = this.bowerdir;
     options.root = this.root;
-    return hydrolysis.Analyzer.analyze(endpoint, options);
+    return options;
+  },
+  _getFSResolver: function() {
+    return new hydrolysis.FSResolver(this._getOptions());
+  },
+  _getAnalyzer: function(endpoint) {
+    return hydrolysis.Analyzer.analyze(endpoint, this._getOptions());
   },
   _getDeps: function _getDeps(endpoint) {
     return this._getAnalyzer(endpoint).then(function(analyzer){
@@ -91,7 +97,7 @@ WebComponentShards.prototype = {
   },
   build: function build() {
     if (this.built) {
-      throw new Error("Build may only be called once.");
+      throw new Error("build may only be called once.");
     }
     this.built = true;
     this._prepOutput();
@@ -101,14 +107,16 @@ WebComponentShards.prototype = {
       this.endpoints.forEach(function(endpoint){
         var oneEndpointDone = new Promise(function(resolve, reject) {
           var vulcan = new Vulcan({
-            abspath: this.root,
+            abspath: null,
+            fsResolver: this._getFSResolver(),
             addedImports: [this.shared_import],
             stripExcludes: commonDeps,
             inlineScripts: true,
-            inlineCss: true
+            inlineCss: true,
+            inputUrl: endpoint
           });
           try {
-            vulcan.process(endpoint, function(err, doc) {
+            vulcan.process(null, function(err, doc) {
               if (err) {
                 reject(err);
               } else {
@@ -126,12 +134,13 @@ WebComponentShards.prototype = {
       }.bind(this));
       var sharedEndpointDone = new Promise(function(resolve, reject) {
         var vulcan = new Vulcan({
-          abspath: this.root,
+          fsResolver: this._getFSResolver(),
           inlineScripts: true,
-            inlineCss: true
+            inlineCss: true,
+            inputUrl: url.resolve(this.workdir, this.shared_import)
         });
         try {
-          vulcan.process(url.resolve(this.workdir, this.shared_import), function(err, doc) {
+          vulcan.process(null, function(err, doc) {
             if (err) {
               reject(err);
             } else {

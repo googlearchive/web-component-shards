@@ -20,10 +20,10 @@
   "dependencies": {
     "command-line-args": "^1.0.0",
     "es6-promise": "^3.0.2",
-    "hydrolysis": "git://github.com/Polymer/hydrolysis.git#shardFixups",
+    "hydrolysis": "^1.19.1",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.4.3",
-    "vulcanize": "git://github.com/Polymer/vulcanize.git#bowerDir"
+    "vulcanize": "^1.13.0"
   },
   "devDependencies": {
     "chai": "^2.3.0",
