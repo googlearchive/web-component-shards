@@ -37,8 +37,8 @@ var cli = cliArgs([
     defaultValue: process.cwd(),
     alias: "r",
     description: (
-      "Root directory against which URLs in inputs are resolved. " +
-      "If not specified, then the current working directory is used."
+      "Root directory against which URLs of endpoints and HTML imports are " +
+      "resolved. If not specified, then the current working directory is used."
     )
   },
   {
@@ -54,7 +54,8 @@ var cli = cliArgs([
     type: String,
     alias: "i",
     defaultValue: "shared.html",
-    description: "Name of the programatically created common dependency file."
+    description: "Name of the programatically created common dependency file. " +
+    "Defaults to 'shared.html'"
   },
   {
     name: "sharing_threshold",
@@ -64,8 +65,8 @@ var cli = cliArgs([
     description: (
       "Number of endpoints an import must be found in to be added to " +
       "'shared_import'. For example, 2 will include all imports found " +
-      "in at least 2 endpoints, and 1 will include all dependencies of any" +
-      "endpoint"
+      "in at least 2 endpoints, and 1 will include all dependencies of any " +
+      "endpoint. Defaults to 2."
     )
   },
   {
@@ -73,7 +74,7 @@ var cli = cliArgs([
     type: String,
     alias: "d",
     defaultValue: "dist/",
-    description: "Destination for vulcanized application."
+    description: "Destination for vulcanized application. Defaults to 'dist/'"
   },
   {
     name: "workdir",
@@ -81,7 +82,7 @@ var cli = cliArgs([
     alias: "d",
     defaultValue: "tmp/",
     description: "Temporary directory for holding in-process files. DANGER: " +
-    " this directory will be deleted upon tool success."
+    " this directory will be deleted upon tool success. Defaults to 'tmp/'"
   }
 ]);
 
