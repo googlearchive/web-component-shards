@@ -79,7 +79,7 @@ var cli = cliArgs([
   {
     name: "workdir",
     type: String,
-    alias: "d",
+    alias: "w",
     defaultValue: "tmp/",
     description: "Temporary directory for holding in-process files. DANGER: " +
     " this directory will be deleted upon tool success. Defaults to 'tmp/'"
