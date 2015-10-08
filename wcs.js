@@ -15,6 +15,7 @@ var url = require('url');
 var Vulcan = require('vulcanize');
 var fs = require('fs');
 var Promise = require('es6-promise').Promise;
+var path = require('path');
 
 var WebComponentShards = function WebComponentShards(options){
   this.root = options.root;
@@ -121,12 +122,15 @@ WebComponentShards.prototype = {
                 reject(err);
               } else {
                 var outPath = url.resolve(this.dest_dir, endpoint);
+                var outDir = path.dirname(outPath);
+                mkdirp.sync(outDir);
                 var fd = fs.openSync(outPath, 'w');
                 fs.writeSync(fd, doc);
                 resolve(outPath);
               }
             }.bind(this));
           } catch (err) {
+            console.error("Error writing output file!");
             reject(err);
           }
         }.bind(this));
