@@ -130,6 +130,7 @@ WebComponentShards.prototype = {
               }
             }.bind(this));
           } catch (err) {
+            console.error("Error writing output file!");
             reject(err);
           }
         }.bind(this));
