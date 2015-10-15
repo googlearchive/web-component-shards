@@ -81,14 +81,23 @@ WebComponentShards.prototype = {
   },
   _synthesizeImport: function _synthesizeImport() {
     return this._getCommonDeps().then(function(commonDeps) {
-      var synthetic = '';
+      /** Generate the file of shared imports. */
+      var output = '';
+      var workdirPath = url.resolve(this.root, this.workdir);
+      var outputPath = url.resolve(workdirPath, this.shared_import);
+      /**
+       * If the shared import is in a subdirectory, it needs to have a properly adjusted
+       * base directory.
+       */
+
+      var baseUrl = path.relative(outputPath, workdirPath);
       for (var dep in commonDeps) {
-        synthetic += '<link rel="import" href="../' + commonDeps[dep] + '">\n';
+        output += '<link rel="import" href="' + baseUrl + '/' + commonDeps[dep] + '">\n';
       }
-      var path = url.resolve(this.root, this.workdir);
-      path = url.resolve(path, this.shared_import);
-      var fd = fs.openSync(path, 'w');
-      fs.writeSync(fd, synthetic);
+      var outDir = path.dirname(outputPath);
+      mkdirp.sync(outDir);
+      var fd = fs.openSync(outputPath, 'w');
+      fs.writeSync(fd, output);
       return commonDeps;
     }.bind(this));
   },
@@ -106,11 +115,14 @@ WebComponentShards.prototype = {
       var endpointsVulcanized = [];
       // Vulcanize each endpoint
       this.endpoints.forEach(function(endpoint){
+        var outPath = url.resolve(this.dest_dir, endpoint);
+        var outDir = path.dirname(outPath);
+        var pathToShared = path.relative(outDir, url.resolve(this.dest_dir, this.shared_import));
         var oneEndpointDone = new Promise(function(resolve, reject) {
           var vulcan = new Vulcan({
             abspath: null,
             fsResolver: this._getFSResolver(),
-            addedImports: [this.shared_import],
+            addedImports: [pathToShared],
             stripExcludes: commonDeps,
             inlineScripts: true,
             inlineCss: true,
@@ -149,6 +161,8 @@ WebComponentShards.prototype = {
               reject(err);
             } else {
               var outPath = url.resolve(this.dest_dir, this.shared_import);
+              var outDir = path.dirname(outPath);
+              mkdirp.sync(outDir);
               var fd = fs.openSync(outPath, 'w');
               fs.writeSync(fd, doc);
               resolve(outPath);
