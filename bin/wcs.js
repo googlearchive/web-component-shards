@@ -108,12 +108,11 @@ if (options.help) {
 if (options.root !== '' && !/[\/\\]$/.test(options.root)) {
   options.root += '/';
 }
-var workPath = path.resolve(options.root, options.workdir);
+var workPath = path.resolve(options.workdir);
 try {
   var workdir = fs.statSync(workPath);
   if (workdir) {
-    console.log(workdir);
-    console.log("Working directory already exists! Please clean up.");
+    console.log("Working directory " + workPath + " already exists! Please clean up.");
     process.exit(1);
   }
 } catch (err) {
@@ -128,7 +127,6 @@ if (!endpoints || !endpoints.length) {
   console.log(usage);
   process.exit(-1);
 }
-
 var shards = new WebComponentShards(options);
 shards.build().then(function(){
   console.log("Build success!");
