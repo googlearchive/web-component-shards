@@ -18,7 +18,7 @@ var Promise = require('es6-promise').Promise;
 var path = require('path');
 
 var WebComponentShards = function WebComponentShards(options){
-  this.root = options.root;
+  this.root = path.resolve(options.root);
   this.endpoints = options.endpoints;
   this.bowerdir = options.bowerdir;
   this.shared_import = options.shared_import;
