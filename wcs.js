@@ -83,16 +83,17 @@ WebComponentShards.prototype = {
     return this._getCommonDeps().then(function(commonDeps) {
       /** Generate the file of shared imports. */
       var output = '';
-      var workdirPath = url.resolve(this.root, this.workdir);
-      var outputPath = url.resolve(workdirPath, this.shared_import);
+      var outputPath = path.resolve(this.workdir, this.shared_import);
       /**
        * If the shared import is in a subdirectory, it needs to have a properly adjusted
        * base directory.
        */
-
-      var baseUrl = path.relative(outputPath, workdirPath);
+      var baseUrl = path.relative(path.dirname(outputPath), this.workdir);
+      if (baseUrl) {
+        baseUrl += '/';
+      }
       for (var dep in commonDeps) {
-        output += '<link rel="import" href="' + baseUrl + '/' + commonDeps[dep] + '">\n';
+        output += '<link rel="import" href="' + baseUrl + commonDeps[dep] + '">\n';
       }
       var outDir = path.dirname(outputPath);
       mkdirp.sync(outDir);
