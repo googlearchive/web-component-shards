@@ -147,11 +147,29 @@ WebComponentShards.prototype = {
         endpointsVulcanized.push(oneEndpointDone);
       }.bind(this));
       var sharedEndpointDone = new Promise(function(resolve, reject) {
+        // Create a resolver that knows about shared.html being in another place.
+        var fsResolver = this._getFSResolver();
+        var accept = function(uri, deferred) {
+          if (uri === this.shared_import) {
+            var sharedImportPath = path.resolve(this.workdir, this.shared_import);
+            fs.readFile(sharedImportPath, 'utf-8', function(err, content) {
+              if (err) {
+                console.log("ERROR finding " + sharedImportPath);
+                deferred.reject(err);
+              } else {
+                deferred.resolve(content);
+              }
+            });
+            return true;
+          } else {
+            return fsResolver.accept(uri, deferred);
+          }
+        }.bind(this);
         var vulcan = new Vulcan({
-          fsResolver: this._getFSResolver(),
+          fsResolver: { accept: accept },
           inlineScripts: true,
-            inlineCss: true,
-            inputUrl: url.resolve(this.workdir, this.shared_import)
+          inlineCss: true,
+          inputUrl: this.shared_import
         });
         try {
           vulcan.process(null, function(err, doc) {
