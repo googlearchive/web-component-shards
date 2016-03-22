@@ -25,6 +25,7 @@ var WebComponentShards = function WebComponentShards(options){
   this.sharing_threshold = options.sharing_threshold;
   this.dest_dir = path.join(path.resolve(options.dest_dir), "/");
   this.workdir = options.workdir;
+  this.depReport = options.depReport;
   this.built = false;
 };
 
@@ -57,12 +58,19 @@ WebComponentShards.prototype = {
   _getCommonDeps: function _getCommonDeps() {
     var endpointDeps = [];
     for (var i = 0; i < this.endpoints.length; i++) {
-      endpointDeps.push(this._getDeps(this.endpoints[i]));
+      endpointDeps.push((function(endpoint) {
+        return this._getDeps(endpoint).then(function(deps) {
+          return {
+            endpoint: endpoint,
+            deps: deps
+          };
+        });
+      }.bind(this))(this.endpoints[i]));
     }
     return Promise.all(endpointDeps).then(function(allEndpointDeps){
       var common = {};
-      allEndpointDeps.forEach(function(endpointDepList){
-        endpointDepList.forEach(function(dep){
+      allEndpointDeps.forEach(function(endpointDep){
+        endpointDep.deps.forEach(function(dep){
           if (!common[dep]) {
             common[dep] = 1;
           } else {
@@ -75,6 +83,21 @@ WebComponentShards.prototype = {
         if (common[dep] >= this.sharing_threshold) {
           depsOverThreshold.push(dep);
         }
+      }
+      if (this.depReport) {
+        var report = allEndpointDeps.reduce(function(prev, value) {
+          prev[value.endpoint] = value.deps.filter(function(dep) {
+            return common[dep] < this.sharing_threshold;
+          }.bind(this));
+          return prev;
+        }.bind(this), {});
+        report[this.shared_import] = depsOverThreshold;
+
+        var outputPath = path.resolve(process.cwd(), this.depReport);
+        var outDir = path.dirname(outputPath);
+        mkdirp.sync(outDir);
+        var fd = fs.openSync(outputPath, 'w');
+        fs.writeSync(fd, JSON.stringify(report));
       }
       return depsOverThreshold;
     }.bind(this));

@@ -83,6 +83,13 @@ var cli = cliArgs([
     defaultValue: "tmp/",
     description: "Temporary directory for holding in-process files. DANGER: " +
     " this directory will be deleted upon tool success. Defaults to 'tmp/'"
+  },
+  {
+    name: "depReport",
+    type: String,
+    alias: "r",
+    description: "Name of file that contains a report on the dependencies found " +
+    "for each endpoint"
   }
 ]);
 
