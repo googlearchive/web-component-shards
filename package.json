@@ -23,7 +23,7 @@
     "hydrolysis": "^1.19.1",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.4.3",
-    "vulcanize": "^1.13.0"
+    "vulcanize": "1.14.8"
   },
   "devDependencies": {
     "chai": "^2.3.0",
