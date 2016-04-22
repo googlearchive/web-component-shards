@@ -23,7 +23,7 @@ var WebComponentShards = function WebComponentShards(options){
   this.bowerdir = options.bowerdir;
   this.shared_import = options.shared_import;
   this.sharing_threshold = options.sharing_threshold;
-  this.dest_dir = url.resolve(this.root, options.dest_dir);
+  this.dest_dir = path.join(path.resolve(options.dest_dir), "/");
   this.workdir = options.workdir;
   this.built = false;
 };
@@ -102,8 +102,7 @@ WebComponentShards.prototype = {
     }.bind(this));
   },
   _prepOutput: function _prepOutput() {
-    var outDir = url.resolve(this.root, this.dest_dir);
-    mkdirp.sync(outDir);
+    mkdirp.sync(this.dest_dir);
   },
   build: function build() {
     if (this.built) {
@@ -133,8 +132,6 @@ WebComponentShards.prototype = {
               if (err) {
                 reject(err);
               } else {
-                var outPath = url.resolve(this.dest_dir, endpoint);
-                var outDir = path.dirname(outPath);
                 mkdirp.sync(outDir);
                 var fd = fs.openSync(outPath, 'w');
                 fs.writeSync(fd, doc);
