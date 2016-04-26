@@ -87,7 +87,6 @@ var cli = cliArgs([
   {
     name: "depReport",
     type: String,
-    alias: "r",
     description: "Name of file that contains a report on the dependencies found " +
     "for each endpoint"
   }
