@@ -83,7 +83,15 @@ var cli = cliArgs([
     defaultValue: "tmp/",
     description: "Temporary directory for holding in-process files. DANGER: " +
     " this directory will be deleted upon tool success. Defaults to 'tmp/'"
+  },
+  {
+    name: "shared_excludes",
+    type: String,
+    alias: "x",
+    multiple: true,
+    description: "Exclude files from shared output"
   }
+
 ]);
 
 var usage = cli.getUsage({

@@ -25,6 +25,7 @@ var WebComponentShards = function WebComponentShards(options){
   this.sharing_threshold = options.sharing_threshold;
   this.dest_dir = path.join(path.resolve(options.dest_dir), "/");
   this.workdir = options.workdir;
+  this.shared_excludes = options.shared_excludes || [];
   this.built = false;
 };
 
@@ -89,7 +90,6 @@ WebComponentShards.prototype = {
        * If the shared import is in a subdirectory, it needs to have a properly adjusted
        * base directory.
        */
-
       var baseUrl = path.relative(outputPath, workdirPath);
       for (var dep in commonDeps) {
         output += '<link rel="import" href="' + baseUrl + '/' + commonDeps[dep] + '">\n';
@@ -112,11 +112,17 @@ WebComponentShards.prototype = {
     this._prepOutput();
     return this._synthesizeImport().then(function (commonDeps) {
       var endpointsVulcanized = [];
+
+      console.log('common deps to exclude from each view', commonDeps);
       // Vulcanize each endpoint
       this.endpoints.forEach(function(endpoint){
         var outPath = url.resolve(this.dest_dir, endpoint);
         var outDir = path.dirname(outPath);
         var pathToShared = path.relative(outDir, url.resolve(this.dest_dir, this.shared_import));
+
+        console.log('outdir', outDir);
+          console.log('dest_dir', this.dest_dir);
+          console.log('shared_import', this.shared_import);
         var oneEndpointDone = new Promise(function(resolve, reject) {
           var vulcan = new Vulcan({
             abspath: null,
@@ -148,9 +154,11 @@ WebComponentShards.prototype = {
       var sharedEndpointDone = new Promise(function(resolve, reject) {
         var vulcan = new Vulcan({
           fsResolver: this._getFSResolver(),
+          stripExcludes: this.shared_excludes,
+          excludes: this.shared_excludes,
           inlineScripts: true,
-            inlineCss: true,
-            inputUrl: url.resolve(this.workdir, this.shared_import)
+          inlineCss: true,
+          inputUrl: url.resolve(this.workdir, this.shared_import)
         });
         try {
           vulcan.process(null, function(err, doc) {
