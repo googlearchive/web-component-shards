@@ -120,8 +120,8 @@ var workPath = path.resolve(options.workdir);
 try {
   var workdir = fs.statSync(workPath);
   if (workdir) {
-    console.log("Working directory " + workPath + " already exists! Please clean up.");
-    process.exit(1);
+    rimraf.sync(workPath, {});
+    console.log("Delete working directory " + workPath + ".");
   }
 } catch (err) {
   // This is good. The workdir shouldn't exist.
@@ -141,4 +141,5 @@ shards.build().then(function(){
   rimraf.sync(workPath, {});
 }).catch(function(err){
   console.error(err.stack);
+  rimraf.sync(workPath, {});
 });

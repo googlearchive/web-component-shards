@@ -110,6 +110,7 @@ WebComponentShards.prototype = {
     }
     this.built = true;
     this._prepOutput();
+
     return this._synthesizeImport().then(function (commonDeps) {
       var endpointsVulcanized = [];
       // Vulcanize each endpoint
