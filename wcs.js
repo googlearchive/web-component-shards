@@ -154,7 +154,6 @@ WebComponentShards.prototype = {
       var sharedEndpointDone = new Promise(function(resolve, reject) {
         var vulcan = new Vulcan({
           fsResolver: this._getFSResolver(),
-          stripExcludes: this.shared_excludes,
           excludes: this.shared_excludes,
           inlineScripts: true,
           inlineCss: true,
