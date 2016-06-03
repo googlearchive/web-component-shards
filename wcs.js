@@ -112,17 +112,11 @@ WebComponentShards.prototype = {
     this._prepOutput();
     return this._synthesizeImport().then(function (commonDeps) {
       var endpointsVulcanized = [];
-
-      console.log('common deps to exclude from each view', commonDeps);
       // Vulcanize each endpoint
       this.endpoints.forEach(function(endpoint){
         var outPath = url.resolve(this.dest_dir, endpoint);
         var outDir = path.dirname(outPath);
         var pathToShared = path.relative(outDir, url.resolve(this.dest_dir, this.shared_import));
-
-        console.log('outdir', outDir);
-          console.log('dest_dir', this.dest_dir);
-          console.log('shared_import', this.shared_import);
         var oneEndpointDone = new Promise(function(resolve, reject) {
           var vulcan = new Vulcan({
             abspath: null,
