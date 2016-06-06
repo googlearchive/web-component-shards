@@ -117,6 +117,13 @@ if (options.help) {
 if (options.root !== '' && !/[\/\\]$/.test(options.root)) {
   options.root += '/';
 }
+if (options.dest_dir !== '' && !/[\/\\]$/.test(options.dest_dir)) {
+    options.dest_dir += '/';
+}
+if (options.workdir !== '' && !/[\/\\]$/.test(options.workdir)) {
+    options.workdir += '/';
+}
+
 var workdirPath = url.resolve(options.root, options.workdir);
 var workPath = path.resolve(workdirPath);
 try {
