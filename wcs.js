@@ -95,6 +95,7 @@ WebComponentShards.prototype = {
         output += '<link rel="import" href="' + baseUrl + '/' + commonDeps[dep] + '">\n';
       }
       var outDir = path.dirname(outputPath);
+
       mkdirp.sync(outDir);
       var fd = fs.openSync(outputPath, 'w');
       fs.writeSync(fd, output);

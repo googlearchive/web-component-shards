@@ -14,6 +14,7 @@ var WebComponentShards = require('../wcs');
 var cliArgs = require("command-line-args");
 var fs = require('fs');
 var path = require('path');
+var url = require('url');
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 
@@ -116,7 +117,8 @@ if (options.help) {
 if (options.root !== '' && !/[\/\\]$/.test(options.root)) {
   options.root += '/';
 }
-var workPath = path.resolve(options.workdir);
+var workdirPath = url.resolve(options.root, options.workdir);
+var workPath = path.resolve(workdirPath);
 try {
   var workdir = fs.statSync(workPath);
   if (workdir) {
@@ -126,6 +128,7 @@ try {
 } catch (err) {
   // This is good. The workdir shouldn't exist.
 }
+
 mkdirp.sync(workPath);
 
 var endpoints = options.endpoints;
