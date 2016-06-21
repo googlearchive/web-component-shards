@@ -133,4 +133,5 @@ shards.build().then(function(){
   rimraf.sync(workPath, {});
 }).catch(function(err){
   console.error(err.stack);
+  process.exit(-1);
 });
