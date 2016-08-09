@@ -91,8 +91,21 @@ var cli = cliArgs([
     alias: "x",
     multiple: true,
     description: "Exclude files from shared output"
+  },
+  {
+    name: "strip_shared_excludes",
+    type: String,
+    alias: "o",
+    multiple: true,
+    description: "Exclude files from shared output and completely strip the reference"
+  },
+  {
+    name: "force",
+    type: Boolean,
+    alias: "f",
+    defaultValue: false,
+    description: "force delete the working directory"
   }
-
 ]);
 
 var usage = cli.getUsage({
@@ -129,8 +142,14 @@ var workPath = path.resolve(workdirPath);
 try {
   var workdir = fs.statSync(workPath);
   if (workdir) {
-    rimraf.sync(workPath, {});
-    console.log("Delete working directory " + workPath + ".");
+    if (options.force){
+      rimraf.sync(workPath, {});
+      console.log("Delete working directory " + workPath + ".");
+    }
+    else {
+      console.log("Working directory " + workPath + " already exists! Please clean up.");
+      process.exit(1);
+    }
   }
 } catch (err) {
   // This is good. The workdir shouldn't exist.

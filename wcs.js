@@ -26,6 +26,7 @@ var WebComponentShards = function WebComponentShards(options){
   this.dest_dir = path.join(path.resolve(options.dest_dir), "/");
   this.workdir = options.workdir;
   this.shared_excludes = options.shared_excludes || [];
+  this.strip_excludes = options.strip_excludes || [];
   this.built = false;
 };
 
@@ -151,6 +152,7 @@ WebComponentShards.prototype = {
         var vulcan = new Vulcan({
           fsResolver: this._getFSResolver(),
           excludes: this.shared_excludes,
+          stripExcludes: this.strip_excludes,
           inlineScripts: true,
           inlineCss: true,
           inputUrl: url.resolve(this.workdir, this.shared_import)
