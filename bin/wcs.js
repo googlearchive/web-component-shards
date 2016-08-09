@@ -93,7 +93,7 @@ var cli = cliArgs([
     description: "Exclude files from shared output"
   },
   {
-    name: "strip_shared_excludes",
+    name: "strip_excludes",
     type: String,
     alias: "o",
     multiple: true,
