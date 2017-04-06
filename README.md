@@ -1,5 +1,12 @@
 # web-component-shards
 
+## This package is deprecated. Please use the Polymer CLI, or the Polymer Bundler
+
+Polymer CLI: https://github.com/Polymer/polymer-cli
+Polymer Bundler: https://github.com/Polymer/polymer-bundler
+
+---
+
 Builds a multi-page app with shared dependencies.
 
 
