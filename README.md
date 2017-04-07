@@ -25,4 +25,7 @@ An HTML file containing the complete dependencies and implementation for one or 
 - `-i`, `--shared_import string`       Name of the programatically created common dependency file. Defaults to 'shared.html'
 - `-s`, `--sharing_threshold number`   Number of endpoints an import must be found in to be added to 'shared_import'. For example, 2 will include all imports found in at least 2 endpoints, and 1 will include all dependencies of any endpoint. Defaults to 2.
 - `-d`, `--dest_dir string`            Destination for vulcanized application. Defaults to 'dist/'.
-- `-w`, `--workdir string`             Temporary directory for holding in-process files. DANGER: this directory will be deleted upon tool success. Defaults to 'tmp/'
+- `-w`, `--workdir string`             Temporary directory for holding in-process files. DANGER: this directory will be deleted upon process completion. Defaults to 'tmp/'
+- `-x`, `--exclude files string[]`     Files to be excluded from shared output. These excluded files has to be loaded manually.     
+- `-o`, `--strip_exclude file string[]`Excluded Files to be omitted from shared output.
+- `-f`, `--force boolean`              Force delete working directory 

@@ -25,6 +25,8 @@ var WebComponentShards = function WebComponentShards(options){
   this.sharing_threshold = options.sharing_threshold;
   this.dest_dir = path.join(path.resolve(options.dest_dir), "/");
   this.workdir = options.workdir;
+  this.shared_excludes = options.shared_excludes || [];
+  this.strip_excludes = options.strip_excludes || [];
   this.built = false;
 };
 
@@ -89,12 +91,12 @@ WebComponentShards.prototype = {
        * If the shared import is in a subdirectory, it needs to have a properly adjusted
        * base directory.
        */
-
       var baseUrl = path.relative(outputPath, workdirPath);
       for (var dep in commonDeps) {
         output += '<link rel="import" href="' + baseUrl + '/' + commonDeps[dep] + '">\n';
       }
       var outDir = path.dirname(outputPath);
+
       mkdirp.sync(outDir);
       var fd = fs.openSync(outputPath, 'w');
       fs.writeSync(fd, output);
@@ -110,6 +112,7 @@ WebComponentShards.prototype = {
     }
     this.built = true;
     this._prepOutput();
+
     return this._synthesizeImport().then(function (commonDeps) {
       var endpointsVulcanized = [];
       // Vulcanize each endpoint
@@ -148,9 +151,11 @@ WebComponentShards.prototype = {
       var sharedEndpointDone = new Promise(function(resolve, reject) {
         var vulcan = new Vulcan({
           fsResolver: this._getFSResolver(),
+          excludes: this.shared_excludes,
+          stripExcludes: this.strip_excludes,
           inlineScripts: true,
-            inlineCss: true,
-            inputUrl: url.resolve(this.workdir, this.shared_import)
+          inlineCss: true,
+          inputUrl: url.resolve(this.workdir, this.shared_import)
         });
         try {
           vulcan.process(null, function(err, doc) {

@@ -14,6 +14,7 @@ var WebComponentShards = require('../wcs');
 var cliArgs = require("command-line-args");
 var fs = require('fs');
 var path = require('path');
+var url = require('url');
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 
@@ -83,6 +84,27 @@ var cli = cliArgs([
     defaultValue: "tmp/",
     description: "Temporary directory for holding in-process files. DANGER: " +
     " this directory will be deleted upon tool success. Defaults to 'tmp/'"
+  },
+  {
+    name: "shared_excludes",
+    type: String,
+    alias: "x",
+    multiple: true,
+    description: "Exclude files from shared output"
+  },
+  {
+    name: "strip_excludes",
+    type: String,
+    alias: "o",
+    multiple: true,
+    description: "Exclude files from shared output and completely strip the reference"
+  },
+  {
+    name: "force",
+    type: Boolean,
+    alias: "f",
+    defaultValue: false,
+    description: "force delete the working directory"
   }
 ]);
 
@@ -108,16 +130,31 @@ if (options.help) {
 if (options.root !== '' && !/[\/\\]$/.test(options.root)) {
   options.root += '/';
 }
-var workPath = path.resolve(options.workdir);
+if (options.dest_dir !== '' && !/[\/\\]$/.test(options.dest_dir)) {
+    options.dest_dir += '/';
+}
+if (options.workdir !== '' && !/[\/\\]$/.test(options.workdir)) {
+    options.workdir += '/';
+}
+
+var workdirPath = url.resolve(options.root, options.workdir);
+var workPath = path.resolve(workdirPath);
 try {
   var workdir = fs.statSync(workPath);
   if (workdir) {
-    console.log("Working directory " + workPath + " already exists! Please clean up.");
-    process.exit(1);
+    if (options.force){
+      rimraf.sync(workPath, {});
+      console.log("Delete working directory " + workPath + ".");
+    }
+    else {
+      console.log("Working directory " + workPath + " already exists! Please clean up.");
+      process.exit(1);
+    }
   }
 } catch (err) {
   // This is good. The workdir shouldn't exist.
 }
+
 mkdirp.sync(workPath);
 
 var endpoints = options.endpoints;
@@ -133,4 +170,5 @@ shards.build().then(function(){
   rimraf.sync(workPath, {});
 }).catch(function(err){
   console.error(err.stack);
+  rimraf.sync(workPath, {});
 });
