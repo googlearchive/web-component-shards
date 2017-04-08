@@ -52,6 +52,7 @@ WebComponentShards.prototype = {
     }).catch(function(err){
       console.log(err);
       console.log("FAILED IN GETDEPS");
+      throw err;
     });
   },
   _getCommonDeps: function _getCommonDeps() {
