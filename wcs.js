@@ -18,13 +18,14 @@ var Promise = require('es6-promise').Promise;
 var path = require('path');
 
 var WebComponentShards = function WebComponentShards(options){
-  this.root = options.root;
+  this.root = path.resolve(options.root);
   this.endpoints = options.endpoints;
   this.bowerdir = options.bowerdir;
   this.shared_import = options.shared_import;
   this.sharing_threshold = options.sharing_threshold;
   this.dest_dir = path.join(path.resolve(options.dest_dir), "/");
   this.workdir = options.workdir;
+  this.depReport = options.depReport;
   this.built = false;
 };
 
@@ -57,12 +58,19 @@ WebComponentShards.prototype = {
   _getCommonDeps: function _getCommonDeps() {
     var endpointDeps = [];
     for (var i = 0; i < this.endpoints.length; i++) {
-      endpointDeps.push(this._getDeps(this.endpoints[i]));
+      endpointDeps.push((function(endpoint) {
+        return this._getDeps(endpoint).then(function(deps) {
+          return {
+            endpoint: endpoint,
+            deps: deps
+          };
+        });
+      }.bind(this))(this.endpoints[i]));
     }
     return Promise.all(endpointDeps).then(function(allEndpointDeps){
       var common = {};
-      allEndpointDeps.forEach(function(endpointDepList){
-        endpointDepList.forEach(function(dep){
+      allEndpointDeps.forEach(function(endpointDep){
+        endpointDep.deps.forEach(function(dep){
           if (!common[dep]) {
             common[dep] = 1;
           } else {
@@ -76,6 +84,21 @@ WebComponentShards.prototype = {
           depsOverThreshold.push(dep);
         }
       }
+      if (this.depReport) {
+        var report = allEndpointDeps.reduce(function(prev, value) {
+          prev[value.endpoint] = value.deps.filter(function(dep) {
+            return common[dep] < this.sharing_threshold;
+          }.bind(this));
+          return prev;
+        }.bind(this), {});
+        report[this.shared_import] = depsOverThreshold;
+
+        var outputPath = path.resolve(process.cwd(), this.depReport);
+        var outDir = path.dirname(outputPath);
+        mkdirp.sync(outDir);
+        var fd = fs.openSync(outputPath, 'w');
+        fs.writeSync(fd, JSON.stringify(report));
+      }
       return depsOverThreshold;
     }.bind(this));
   },
@@ -83,16 +106,17 @@ WebComponentShards.prototype = {
     return this._getCommonDeps().then(function(commonDeps) {
       /** Generate the file of shared imports. */
       var output = '';
-      var workdirPath = url.resolve(this.root, this.workdir);
-      var outputPath = url.resolve(workdirPath, this.shared_import);
+      var outputPath = path.resolve(this.workdir, this.shared_import);
       /**
        * If the shared import is in a subdirectory, it needs to have a properly adjusted
        * base directory.
        */
-
-      var baseUrl = path.relative(outputPath, workdirPath);
+      var baseUrl = path.relative(path.dirname(outputPath), this.workdir);
+      if (baseUrl) {
+        baseUrl += '/';
+      }
       for (var dep in commonDeps) {
-        output += '<link rel="import" href="' + baseUrl + '/' + commonDeps[dep] + '">\n';
+        output += '<link rel="import" href="' + baseUrl + commonDeps[dep] + '">\n';
       }
       var outDir = path.dirname(outputPath);
       mkdirp.sync(outDir);
@@ -116,17 +140,18 @@ WebComponentShards.prototype = {
       this.endpoints.forEach(function(endpoint){
         var outPath = url.resolve(this.dest_dir, endpoint);
         var outDir = path.dirname(outPath);
-        var pathToShared = path.relative(outDir, url.resolve(this.dest_dir, this.shared_import));
+        var pathToShared = '/' + this.shared_import;
         var oneEndpointDone = new Promise(function(resolve, reject) {
-          var vulcan = new Vulcan({
-            abspath: null,
+          var opts = {
+            abspath: this.root,
             fsResolver: this._getFSResolver(),
             addedImports: [pathToShared],
             stripExcludes: commonDeps,
             inlineScripts: true,
             inlineCss: true,
             inputUrl: endpoint
-          });
+          };
+          var vulcan = new Vulcan(opts);
           try {
             vulcan.process(null, function(err, doc) {
               if (err) {
@@ -146,11 +171,33 @@ WebComponentShards.prototype = {
         endpointsVulcanized.push(oneEndpointDone);
       }.bind(this));
       var sharedEndpointDone = new Promise(function(resolve, reject) {
+        // Create a resolver that knows about shared.html being in another place.
+        var fsResolver = this._getFSResolver();
+        var accept = function(uri, deferred) {
+          if (uri === this.shared_import) {
+            console.log("Shared import found!");
+            var sharedImportPath = path.resolve(this.workdir, this.shared_import);
+            fs.readFile(sharedImportPath, 'utf-8', function(err, content) {
+              if (err) {
+                console.log("ERROR finding " + sharedImportPath);
+                deferred.reject(err);
+              } else {
+                console.log(content);
+                deferred.resolve(content);
+              }
+            });
+            return true;
+          } else {
+            return fsResolver.accept(uri, deferred);
+          }
+        }.bind(this);
+        console.log(this.shared_import);
         var vulcan = new Vulcan({
-          fsResolver: this._getFSResolver(),
+          abspath: this.root,
+          fsResolver: { accept: accept },
           inlineScripts: true,
-            inlineCss: true,
-            inputUrl: url.resolve(this.workdir, this.shared_import)
+          inlineCss: true,
+          inputUrl: this.shared_import
         });
         try {
           vulcan.process(null, function(err, doc) {
