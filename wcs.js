@@ -18,7 +18,7 @@ var Promise = require('es6-promise').Promise;
 var path = require('path');
 
 var WebComponentShards = function WebComponentShards(options){
-  this.root = options.root;
+  this.root = path.resolve(options.root);
   this.endpoints = options.endpoints;
   this.bowerdir = options.bowerdir;
   this.shared_import = options.shared_import;
@@ -83,16 +83,17 @@ WebComponentShards.prototype = {
     return this._getCommonDeps().then(function(commonDeps) {
       /** Generate the file of shared imports. */
       var output = '';
-      var workdirPath = url.resolve(this.root, this.workdir);
-      var outputPath = url.resolve(workdirPath, this.shared_import);
+      var outputPath = path.resolve(this.workdir, this.shared_import);
       /**
        * If the shared import is in a subdirectory, it needs to have a properly adjusted
        * base directory.
        */
-
-      var baseUrl = path.relative(outputPath, workdirPath);
+      var baseUrl = path.relative(path.dirname(outputPath), this.workdir);
+      if (baseUrl) {
+        baseUrl += '/';
+      }
       for (var dep in commonDeps) {
-        output += '<link rel="import" href="' + baseUrl + '/' + commonDeps[dep] + '">\n';
+        output += '<link rel="import" href="' + baseUrl + commonDeps[dep] + '">\n';
       }
       var outDir = path.dirname(outputPath);
       mkdirp.sync(outDir);
@@ -146,11 +147,29 @@ WebComponentShards.prototype = {
         endpointsVulcanized.push(oneEndpointDone);
       }.bind(this));
       var sharedEndpointDone = new Promise(function(resolve, reject) {
+        // Create a resolver that knows about shared.html being in another place.
+        var fsResolver = this._getFSResolver();
+        var accept = function(uri, deferred) {
+          if (uri === this.shared_import) {
+            var sharedImportPath = path.resolve(this.workdir, this.shared_import);
+            fs.readFile(sharedImportPath, 'utf-8', function(err, content) {
+              if (err) {
+                console.log("ERROR finding " + sharedImportPath);
+                deferred.reject(err);
+              } else {
+                deferred.resolve(content);
+              }
+            });
+            return true;
+          } else {
+            return fsResolver.accept(uri, deferred);
+          }
+        }.bind(this);
         var vulcan = new Vulcan({
-          fsResolver: this._getFSResolver(),
+          fsResolver: { accept: accept },
           inlineScripts: true,
-            inlineCss: true,
-            inputUrl: url.resolve(this.workdir, this.shared_import)
+          inlineCss: true,
+          inputUrl: this.shared_import
         });
         try {
           vulcan.process(null, function(err, doc) {
